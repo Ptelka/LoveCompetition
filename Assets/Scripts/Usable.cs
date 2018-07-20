@@ -1,16 +1,56 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using UnityEngine;
 
-public class Usable : MonoBehaviour {
-
-	// Use this for initialization
-	void Start () {
+public class Usable : MonoBehaviour
+{
+	[SerializeField] private string hint_name = "";
+	private GameObject hint_object;
+	private bool is_active;
+	
+	void Start ()
+	{
+		hint_object = Utils.Load(hint_name);
 		
+		hint_object.transform.position = transform.position;
+		hint_object.SetActive(false);
+	}
+
+	void Update()
+	{
+		if (!is_active)
+			return;
+
+		if (Input.GetButtonDown("Use"))
+		{
+			Action();
+		}
+	}
+
+	protected virtual void Action()
+	{
+		Debug.Log("Action performed!");
 	}
 	
-	// Update is called once per frame
-	void Update () {
-		
+	private void OnTriggerEnter(Collider other)
+	{
+		ShowHint();
+	}
+
+	private void OnTriggerExit(Collider other)
+	{
+		HideHint();
+	}
+
+	void ShowHint()
+	{
+		hint_object.SetActive(is_active = true);
+	}
+
+	void HideHint()
+	{
+		hint_object.SetActive(is_active = false);
 	}
 }
