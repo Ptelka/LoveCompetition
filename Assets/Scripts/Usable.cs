@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Usable : MonoBehaviour
 {
@@ -12,8 +8,8 @@ public class Usable : MonoBehaviour
 	
 	void Start ()
 	{
-		hint_object = Utils.Load(hint_name);
-		
+		hint_object = Instantiate(Utils.Load(hint_name));
+		hint_object.transform.parent = transform;
 		hint_object.transform.position = transform.position;
 		hint_object.SetActive(false);
 	}
@@ -34,12 +30,12 @@ public class Usable : MonoBehaviour
 		Debug.Log("Action performed!");
 	}
 	
-	private void OnTriggerEnter(Collider other)
+	private void OnTriggerEnter2D(Collider2D other)
 	{
 		ShowHint();
 	}
 
-	private void OnTriggerExit(Collider other)
+	private void OnTriggerExit2D(Collider2D other)
 	{
 		HideHint();
 	}

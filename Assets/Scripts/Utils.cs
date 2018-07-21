@@ -18,4 +18,12 @@ public static class Utils
 
         return obj;
     }
+
+    public static float MaxAbs(float a, float b)
+    {
+        float abs_a = Mathf.Abs(a);
+        float abs_b = Mathf.Abs(b);
+        float max = Mathf.Max(abs_a, abs_b);
+        return Mathf.Approximately(max, abs_a) ? a : b;
+    }
 }
