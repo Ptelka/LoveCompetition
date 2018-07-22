@@ -1,50 +1,80 @@
 ﻿using System;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Enemy : Punchable
 {
-	[SerializeField] private float speed = 1;
+	[SerializeField] private float range = 0.1f;
 	private Action current_behavior;
 	private Animator animator;
+	private Puncher puncher;
 
+	private PlayerController current;
 	
 	void Start ()
 	{
 		current_behavior = Idle;
 		animator = GetComponent<Animator>();		
+		puncher = GetComponentInChildren<Puncher>();		
 		animator.Play("player2_standing");
 	}
 	
 	void Update ()
 	{
-		current_behavior();
+		if(!puncher.IsBusy())
+			current_behavior();
 	}
 
 	private void Idle()
 	{
 		animator.Play("player2_standing");
-	} 
 
-	private void SeekAndDestroy()
-	{
-		Vector3 players_pos = PlayerController.GetInstance().GetPosition();
-		Vector3 direction = players_pos - transform.position;
-		
-		transform.position += direction * speed;
-		animator.Play("player2_walking");
-
-	}
-	
-	private void OnTriggerEnter2D(Collider2D other)
-	{
-		if (other.CompareTag("player"))
+		foreach (var player in PlayerController.GetInstance())
 		{
-			current_behavior = SeekAndDestroy;
+			if (player && player.GetPosition().x < range)
+			{
+				current = player;
+				return;
+			}
 		}
 	}
 
-	private void OnTriggerExit2D(Collider2D other)
+	private void Punch()
 	{
-		current_behavior = Idle;
+		puncher.Punch();
+	}
+
+	private void SeekAndDestroy()
+	{
+		if (current == null)
+		{
+			current_behavior = Idle;
+			return;
+		}
+		
+		Vector3 players_pos = current.GetPosition();
+		Vector3 direction = players_pos - transform.position;
+		 
+		transform.position += direction * speed;
+		animator.Play("player2_walking");
+
+
+		if (current.GetPosition().x >= range)
+		{
+			current_behavior = Idle;
+			current = null;
+		}
+	}
+	
+	private void OnCollisionEnter2D(Collision2D other)
+	{
+		if (other.collider.CompareTag("player"))
+		{
+			current_behavior = Punch;
+		}
+	}
+
+	private void OnCollisionExit2D(Collision2D other)
+	{
+		current_behavior = SeekAndDestroy;
 	}
 }

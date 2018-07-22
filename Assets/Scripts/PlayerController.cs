@@ -1,35 +1,86 @@
 ﻿using System;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : Punchable
 {
-	[SerializeField] private float speed = 1;
-
+	[SerializeField] private GameObject panel;
 	private Animator animator;
-	static private PlayerController instance;
+	static private PlayerController[] instance = new PlayerController[2];
+	private Puncher puncher;
 
-	public static PlayerController GetInstance()
+	private InventoryManager inventory;
+
+	[SerializeField] private int pid;
+	private int jid;
+
+	public static PlayerController[] GetInstance()
 	{
 		return instance;
+	}
+
+	public void AddItem(Item it)
+	{
+		inventory.InsertItem(it);
 	}
 
 	public Vector3 GetPosition()
 	{
 		return transform.position;
 	}
+
+	public int GetJID()
+	{
+		return jid;
+	}
 	
 	void Start ()
 	{
-		instance = this;
-		animator = GetComponent<Animator>();		
-		animator.Play("player1_standing");
+		base.Start();
+		jid = InputHandler.GetJoyId(pid);
+		instance[pid - 1] = this;	
+		animator = GetComponent<Animator>();
+		animator.Play("player" + pid + "_standing");
+		puncher = GetComponentInChildren<Puncher>();
+
+		inventory = panel.GetComponent<InventoryManager>();
+	}
+
+	protected override void OnDeath()
+	{
+		inventory.pop();
+	}
+
+	public int GetPID()
+	{
+		return pid;
 	}
 	
-	// Update is called once per frame
+	public int GetSympathy()
+	{
+		return inventory.GetSympathy();
+	}
+	
 	void FixedUpdate ()
-	{	
-		float x = Input.GetAxis("Horizontal") * speed;
-		float y = Input.GetAxis("Vertical") * speed;
+	{
+		if (IsStunned())
+		{
+			StunUpdate(Time.fixedDeltaTime);
+			return;
+		}
+		
+		if (puncher.IsBusy())
+			return;
+		
+		SetVisible(true);
+		
+		if (InputHandler.GetInput(InputHandler.Type.PUNCH, jid))
+		{
+			puncher.Punch();
+			return;
+		}
+				
+		float x = InputHandler.GetHorizontal(jid) * speed;
+		float y = InputHandler.GetVertical(jid) * speed;
 
 		if (!Mathf.Approximately(x + y, 0))
 		{
@@ -37,7 +88,7 @@ public class PlayerController : MonoBehaviour
 			return;
 		}
 		
-		animator.Play("player1_standing");
+		animator.Play("player" + pid + "_standing");
 	}
 
 	void Walk(float x, float y)
@@ -53,11 +104,6 @@ public class PlayerController : MonoBehaviour
 		sc.x = (-1 + (x < 0 ? 2 : 0)) * Math.Abs(sc.x);
 		transform.localScale = sc;
 		
-		animator.Play("player1_walking");
-	}
-
-	void Punch()
-	{
-		
+		animator.Play("player" + pid + "_walking");
 	}
 }

@@ -26,4 +26,18 @@ public static class Utils
         float max = Mathf.Max(abs_a, abs_b);
         return Mathf.Approximately(max, abs_a) ? a : b;
     }
+    
+    public static float GetAnimTime(Animator animator, string anim_name)
+    {
+        RuntimeAnimatorController ac = animator.runtimeAnimatorController;
+        for(int i = 0; i<ac.animationClips.Length; i++)
+        {
+            if(ac.animationClips[i].name == anim_name)
+            {
+                return ac.animationClips[i].length;
+            }
+        }
+
+        return 0;
+    }
 }
