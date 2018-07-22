@@ -1,10 +1,11 @@
 ﻿
 public class CrushController : Punchable {
-    private void Update()
+    override protected void OnDeath()
     {
         if (IsDead())
         {
-            // Game over
+            Game.GameOver = true;
+            Game.Winner = 0;
         }
     }
 

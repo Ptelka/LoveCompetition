@@ -16,7 +16,8 @@ public class CrushUsable : Usable
         
         if (player.GetSympathy() > 100)
         {
-            // PLayer getpid won
+            Game.GameOver = true;
+            Game.Winner = 0;
         }
     }
     

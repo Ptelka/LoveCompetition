@@ -7,6 +7,7 @@ public static class InputHandler {
     {
         USE,
         PUNCH, 
+        DOGE, 
         NONE
     }
 
@@ -40,6 +41,8 @@ public static class InputHandler {
                 return Input.GetButtonDown("SQR" + pid);
             case Type.PUNCH:
                 return Input.GetButtonDown("BTN" + pid);
+            case Type.DOGE:
+                return Input.GetButtonDown("CIRCLE" + pid);
         }
         
         return false;

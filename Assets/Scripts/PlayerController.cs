@@ -4,23 +4,42 @@ using UnityEngine;
 public class PlayerController : Punchable
 {
 	[SerializeField] private GameObject panel;
+	[SerializeField] private float dogeTime = 1;
+	[SerializeField] private float dogeWait = 3;
+	[SerializeField] private float doge = 2;
+	
 	private Animator animator;
 	static private PlayerController[] instance = new PlayerController[2];
 	private Puncher puncher;
 
+	private float current_speed;
+
+	private Transform spritemask;
 	private InventoryManager inventory;
 
 	[SerializeField] private int pid;
 	private int jid;
+
+	private float doge_timer;
+	private float wait_timer;
 
 	public static PlayerController[] GetInstance()
 	{
 		return instance;
 	}
 
+	void UpdateHeart()
+	{
+		var scale = spritemask.localScale;
+		float sym = (float) GetSympathy();
+		scale.y = Mathf.Min(1f,  sym/ 100f);
+		spritemask.localScale = scale;
+	}
+	
 	public void AddItem(Item it)
 	{
 		inventory.InsertItem(it);
+		UpdateHeart();
 	}
 
 	public Vector3 GetPosition()
@@ -35,12 +54,16 @@ public class PlayerController : Punchable
 	
 	void Start ()
 	{
+		spritemask = transform.Find("heart-mask");
 		base.Start();
 		jid = InputHandler.GetJoyId(pid);
 		instance[pid - 1] = this;	
 		animator = GetComponent<Animator>();
 		animator.Play("player" + pid + "_standing");
 		puncher = GetComponentInChildren<Puncher>();
+		
+		var scale = new Vector3(1, 0, 1);
+		spritemask.localScale = scale;
 
 		inventory = panel.GetComponent<InventoryManager>();
 	}
@@ -48,6 +71,7 @@ public class PlayerController : Punchable
 	protected override void OnDeath()
 	{
 		inventory.pop();
+		UpdateHeart();
 	}
 
 	public int GetPID()
@@ -62,13 +86,22 @@ public class PlayerController : Punchable
 	
 	void FixedUpdate ()
 	{
+		current_speed = speed;
+		if (doge_timer > 0)
+		{
+			current_speed *= doge;
+			doge_timer -= Time.deltaTime;
+		}
+		else
+			wait_timer -= Time.deltaTime;
+		
 		if (IsStunned())
 		{
 			StunUpdate(Time.fixedDeltaTime);
 			return;
 		}
 		
-		if (puncher.IsBusy())
+		if (puncher.IsBusy() || Game.GameOver)
 			return;
 		
 		SetVisible(true);
@@ -78,9 +111,15 @@ public class PlayerController : Punchable
 			puncher.Punch();
 			return;
 		}
-				
-		float x = InputHandler.GetHorizontal(jid) * speed;
-		float y = InputHandler.GetVertical(jid) * speed;
+		
+		if (InputHandler.GetInput(InputHandler.Type.DOGE, jid) && wait_timer <= 0)
+		{
+			doge_timer = dogeTime;
+			wait_timer = dogeWait;
+		}
+		
+		float x = InputHandler.GetHorizontal(jid) * current_speed;
+		float y = InputHandler.GetVertical(jid) * current_speed;
 
 		if (!Mathf.Approximately(x + y, 0))
 		{

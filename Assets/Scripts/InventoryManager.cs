@@ -5,7 +5,7 @@ using UnityEngine;
 public class InventoryManager : MonoBehaviour
 {
     private List<Item> items = new List<Item>();
-    private int sympathy_sum;
+    private int sympathy_sum = 0;
 
     
     

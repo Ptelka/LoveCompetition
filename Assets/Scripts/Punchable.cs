@@ -7,7 +7,11 @@ public class Punchable : MonoBehaviour
 	[SerializeField] protected float speed = 1;
 	[SerializeField] protected float stun = 2;
 	[SerializeField] protected float wink_time = 0.1f;
+	
 	private SpriteRenderer my_renderer;
+	private AudioSource source;
+	
+	[SerializeField] private AudioClip damage;
 
 	private float timer = 0;
 	private float wink_timer = 0;
@@ -18,6 +22,11 @@ public class Punchable : MonoBehaviour
 	public void Start()
 	{
 		my_renderer = GetComponent<SpriteRenderer>();
+		if (damage)
+		{
+			source = GetComponent<AudioSource>();
+			source.clip = damage;
+		}
 	}
 
 	protected void SetVisible(bool v)
@@ -61,14 +70,18 @@ public class Punchable : MonoBehaviour
 	{
 		current_life -= dmg;
 		
+		if(source)
+			source.Play(1);
+		
 		if (current_life <= 0)
 		{
+			dead = true;
+
 			if(timer <= 0)
 			{
 				timer = stun;
 				OnDeath();
 			}
-			dead = true;
 
 			current_life = max_life;
 		}

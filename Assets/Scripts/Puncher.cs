@@ -15,10 +15,16 @@ public class Puncher: MonoBehaviour
     private float busy;
     private float punch_time;
 
+    private AudioSource source;
+    
+    [SerializeField] private AudioClip punch_sound;
+
     private bool dealed;
     
     void Start()
     {
+        source = GetComponent<AudioSource>();
+        source.clip = punch_sound;
         animator = GetComponentInParent<Animator>();
         punch_time = Utils.GetAnimTime(animator, anim_name);
     }
@@ -32,6 +38,7 @@ public class Puncher: MonoBehaviour
         
         busy = punch_time;
         animator.Play(anim_name);
+        source.Play();
     }
 
     public void Update()
