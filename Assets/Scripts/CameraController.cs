@@ -42,9 +42,8 @@ public class CameraController : MonoBehaviour {
 			
 		if (Game.GameOver )
 		{
-
 			timer += Time.deltaTime;
-			if(Game.Winner == player_controller.GetPID() || Game.Winner == 0)
+			if(Game.Winner != player_controller.GetPID() || Game.Winner == 0)
 				gameover.SetActive(true);
 			
 			if (timer > 1.5f && (InputHandler.GetInput(InputHandler.Type.USE, player_controller.GetJID()) || InputHandler.GetInput(InputHandler.Type.USE, player_controller.GetJID())))
@@ -58,7 +57,5 @@ public class CameraController : MonoBehaviour {
 		sky_transform.position = sky_new_pos;
 		
 		transform.position += current_offset;
-		
-		
 	}
 }
